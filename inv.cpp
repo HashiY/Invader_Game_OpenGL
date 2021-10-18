@@ -9,9 +9,9 @@
 #define INVADER_WIDTH (64)
 #define INVADER_HEIGHT (48)
 
-#define INVADER_COLUMN_MAX (11) //lado
-#define INVADER_ROW_MAX (5)    //tate
-#define INVADER_MAX (INVADER_COLUMN_MAX * INVADER_ROW_MAX) //kazu
+#define INVADER_COLUMN_MAX (11) //coluna
+#define INVADER_ROW_MAX (5)    //linha
+#define INVADER_MAX (INVADER_COLUMN_MAX * INVADER_ROW_MAX) //quantidade
 #define INVADER_SPEED (INVADER_WIDTH / 8)
 
 //Tamamho
@@ -66,7 +66,7 @@ PLAYERBEAM playerBeam;
 
 INVADERBEAM invaderBeam[INVADER_COLUMN_MAX];
 
-bool keysPressed[256]; //precionando a tecla
+bool keysPressed[256]; //pressionando a tecla
 
 void init(void){
     for(int i=0; i < INVADER_MAX; i++){
@@ -124,6 +124,8 @@ void tela(void){
     }
     glDisable(GL_BLEND);
 
+    int p = 1;
+
     //desenhar o invader
     glPointSize(16); // tamano do olho
     for(int i=0; i<INVADER_MAX; i++){
@@ -134,9 +136,25 @@ void tela(void){
             glTranslatef(invaders[i].position.x + INVADER_WIDTH/2,
              invaders[i].position.y + INVADER_HEIGHT/2,
              0);
-            glColor3ub(0xff, 0xff, 0xff); //cor branca
+            //glColor3ub(0xff, 0xff, 0xff); //cor branca
+
+            for(int c=0; c<p; c++){
+                const unsigned char colors[][3] = { // cor dos invaders
+                    {0xff,0x00,0x00}, //vermelho
+                    {0xff,0xff,0x00}, //amarelo
+                    {0x00,0xff,0x00}, //verde
+                    {0x00,0xff,0xff}, //ciano
+                    {0xff,0x00,0xff} //magenta
+                };
+                glColor3ubv((GLubyte*)&colors[c]);
+            }
+            
+            if((i+1)/11 == p)
+                p++;
+
             glScalef(INVADER_WIDTH, INVADER_HEIGHT, 0);
             glutSolidSphere(0.5, 8, 2);
+            
             glColor3ub(0x00, 0x00, 0x00); // preto
             glBegin(GL_POINTS);{
                 glVertex2f(-0.25,0.125); //ponto do olho e posicao
@@ -194,7 +212,7 @@ void tela(void){
     glutSwapBuffers();
 }
 
-void andar(void){
+void mov(void){
     if(currentInvader < INVADER_MAX){
         switch (invaderPhase){
         case INVADER_PHASE_RIGHT:
@@ -306,7 +324,7 @@ void andar(void){
         }
     }
 
-    glutPostRedisplay();
+    glutPostRedisplay(); // redesenhar
 }
 
 void Keyboard(unsigned char _key, int, int){
@@ -330,7 +348,7 @@ int main(int argc, char* argv[]){
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 	glutCreateWindow("Invader");
     glutDisplayFunc(tela);
-    glutIdleFunc(andar);
+    glutIdleFunc(mov);  // para o processamento em tempo real
     glutKeyboardFunc(Keyboard); //tecla
     glutKeyboardUpFunc(KeyboardUP); //solta a tecla
     init();
